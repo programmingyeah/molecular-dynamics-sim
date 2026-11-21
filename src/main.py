@@ -2,22 +2,23 @@
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
 import numpy as np
-from atom import Atom
+from atom import *
 
 app = Ursina()
 rng = np.random.default_rng()
 
 SCALE = 1e-10  #one angstrom
-CONTAINER_SIZE = 10*SCALE
+CONTAINER_SIZE = 20*SCALE
 SIGMA = 3e-10
 k_B = 1.380649e-23
 EPSILON = 1e-21
-N_ATOMS = 20
+N_ATOMS = 50
 DT = 5*1e-15
 K = 1
 
 #generate N_ATOMS number of atoms at random positions within CONTAINER_SIZE
-atoms = [Atom(rng.uniform(-CONTAINER_SIZE, CONTAINER_SIZE, size=3)) for _ in range(N_ATOMS)]
+limit = CONTAINER_SIZE-max(ELEMENT_RADIUS_M.values())
+atoms = [Atom(rng.uniform(-limit, limit, size=3)) for _ in range(N_ATOMS)]
 
 #ursina setup
 Entity.default_shader = lit_with_shadows_shader
@@ -71,6 +72,14 @@ def update():
 
     positions += velocities * DT + 0.5 * old_accelerations * DT**2
 
+    #wall collisions
+    for i, atom in enumerate(atoms):
+        limit = CONTAINER_SIZE - atom.radius
+        outside = np.abs(positions[i]) > limit
+
+        velocities[i, outside] *= -1
+        positions[i] = np.clip(positions[i], -limit, limit)
+
     forces = calculate_forces(positions)
 
     new_accelerations = forces / masses[:, np.newaxis]
@@ -81,14 +90,6 @@ def update():
         atom.velocity = velocity.copy()
         entity.position = tuple(position / SCALE)
 
-    #wall collisions
-    for atom in atoms:
-        limit = CONTAINER_SIZE - atom.radius
-        outside = np.abs(atom.position) > limit
-
-        atom.velocity[outside] *= -1
-        atom.position = np.clip(atom.position, -limit, limit)
-
     #calculate the temperature
     kinetic_energy = sum(
         0.5 * atom.mass * np.linalg.norm(atom.velocity)**2 
@@ -98,7 +99,6 @@ def update():
     #in the future we'll be adding atoms in runtime so dont use N_ATOMS 
     temperature = (2 * kinetic_energy / (3 * len(atoms) * k_B))
 
-    print(temperature)
     temperature_text.text = f"Temperature: {temperature:.1f}K"
             
 
