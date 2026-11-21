@@ -26,6 +26,13 @@ sun = DirectionalLight(shadows=True)
 sun.look_at(Vec3(1, -1, -1))
 
 atom_entities = [Entity(model="sphere", color=color.red, scale=2 * atom.radius/SCALE) for atom in atoms]
+container_entity = Entity(
+    model="cube",
+    scale=2 * CONTAINER_SIZE / SCALE,
+    color=color.rgba(180, 180, 180, 100),
+    wireframe=True,
+    double_sided=True,
+)
 
 EditorCamera()
 
