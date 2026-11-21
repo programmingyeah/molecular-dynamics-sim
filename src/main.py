@@ -7,13 +7,16 @@ from atom import Atom
 app = Ursina()
 rng = np.random.default_rng()
 
-SCALE = 10**-12
-N_ATOMS = 5
-DT = 10**-15
+SCALE = 1e-10  #one angstrom
+SIGMA = 3e-10
+EPSILON = 1e-21
+N_ATOMS = 0
+DT = 5*1e-15
 K = 1
 
 #generate N_ATOMS number of atoms at random positions in a 10x10x10 box
-atoms = [Atom(rng.uniform(-5.0, 5.0, size=3) * SCALE) for _ in range(N_ATOMS)]
+#atoms = [Atom(rng.uniform(-5.0, 5.0, size=3) * SCALE) for _ in range(N_ATOMS)]
+atoms = [Atom((0,-2**(1/6)/2.1 * SIGMA,0)), Atom((0,2**(1/6)/2.1 * SIGMA,0))]
 masses = np.array([atom.mass for atom in atoms])
 
 #ursina setup
@@ -26,13 +29,15 @@ atom_entities = [Entity(model="sphere", color=color.red) for _ in atoms]
 
 EditorCamera()
 
-#functions
 def calculate_forces(positions):
     forces = np.zeros((len(atoms), 3))
     for i in range(len(atoms)):
         for j in range(i+1, len(atoms)):
-            #springs between every atom, for now
-            force = K * (positions[j] - positions[i])
+            #lennard jones potential U(r)=4eps * ((sigma/r)^12-(sigma/r)^6)
+            r_vec = positions[i] - positions[j]
+            r = np.linalg.norm(r_vec)
+            if r==0: continue
+            force = 24*EPSILON/r**2 * (2*(SIGMA/r)**12 - (SIGMA/r)**6) * r_vec
             forces[i] += force
             forces[j] -= force
 
