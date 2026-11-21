@@ -13,6 +13,10 @@ ELEMENT_MASS_U = {
     Element.HYDROGEN: 1.008,
 }
 
+ELEMENT_RADIUS_M = {
+    Element.HYDROGEN: 120e-12,
+}
+
 class Atom:
     #hydrogen default element
     def __init__(self, position, element: Element = Element.HYDROGEN):
@@ -23,3 +27,7 @@ class Atom:
     @property
     def mass(self):
         return ELEMENT_MASS_U[self.element] * U_TO_KG
+
+    @property
+    def radius(self):
+        return ELEMENT_RADIUS_M[self.element]

@@ -25,7 +25,7 @@ Entity.default_shader = lit_with_shadows_shader
 sun = DirectionalLight(shadows=True)
 sun.look_at(Vec3(1, -1, -1))
 
-atom_entities = [Entity(model="sphere", color=color.red) for _ in atoms]
+atom_entities = [Entity(model="sphere", color=color.red, scale=2 * atom.radius/SCALE) for atom in atoms]
 
 EditorCamera()
 
