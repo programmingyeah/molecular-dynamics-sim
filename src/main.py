@@ -8,17 +8,26 @@ app = Ursina()
 rng = np.random.default_rng()
 
 SCALE = 1e-10  #one angstrom
-CONTAINER_SIZE = 20*SCALE
+CONTAINER_SIZE = 10*SCALE
 SIGMA = 3e-10
 k_B = 1.380649e-23
 EPSILON = 1e-21
-N_ATOMS = 50
+N_ATOMS = 100
 DT = 5*1e-15
 K = 1
 
 #generate N_ATOMS number of atoms at random positions within CONTAINER_SIZE
 limit = CONTAINER_SIZE-max(ELEMENT_RADIUS_M.values())
-atoms = [Atom(rng.uniform(-limit, limit, size=3)) for _ in range(N_ATOMS)]
+atoms = []
+
+while len(atoms) < N_ATOMS:
+    position = rng.uniform(-limit, limit, size=3)
+
+    if all(
+        np.linalg.norm(position - atom.position) >= 0.9 * SIGMA
+        for atom in atoms
+    ):
+        atoms.append(Atom(position))
 
 #ursina setup
 Entity.default_shader = lit_with_shadows_shader
