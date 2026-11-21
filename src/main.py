@@ -10,6 +10,7 @@ rng = np.random.default_rng()
 SCALE = 1e-10  #one angstrom
 CONTAINER_SIZE = 10*SCALE
 SIGMA = 3e-10
+LJ_CUTOFF = 2.5 * SIGMA
 k_B = 1.380649e-23
 EPSILON = 1e-21
 N_ATOMS = 100
@@ -60,7 +61,7 @@ def calculate_forces(positions):
             #lennard jones potential U(r)=4eps * ((sigma/r)^12-(sigma/r)^6)
             r_vec = positions[i] - positions[j]
             r = np.linalg.norm(r_vec)
-            if r==0: continue
+            if r==0 or r>=LJ_CUTOFF: continue
             force = 24*EPSILON/r**2 * (2*(SIGMA/r)**12 - (SIGMA/r)**6) * r_vec
             forces[i] += force
             forces[j] -= force
