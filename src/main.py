@@ -1,5 +1,6 @@
 #python time
 from ursina import *
+from ursina.shaders import lit_with_shadows_shader
 import numpy as np
 from atom import Atom
 
@@ -15,10 +16,17 @@ K = 1
 atoms = [Atom(rng.uniform(-5.0, 5.0, size=3) * SCALE) for _ in range(N_ATOMS)]
 masses = np.array([atom.mass for atom in atoms])
 
+#ursina setup
+Entity.default_shader = lit_with_shadows_shader
+
+sun = DirectionalLight(shadows=True)
+sun.look_at(Vec3(1, -1, -1))
+
 atom_entities = [Entity(model="sphere", color=color.red) for _ in atoms]
 
 EditorCamera()
 
+#functions
 def calculate_forces(positions):
     forces = np.zeros((len(atoms), 3))
     for i in range(len(atoms)):
