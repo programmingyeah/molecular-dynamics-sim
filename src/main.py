@@ -38,7 +38,15 @@ Entity.default_shader = lit_with_shadows_shader
 sun = DirectionalLight(shadows=True)
 sun.look_at(Vec3(1, -1, -1))
 
-atom_entities = [Entity(model="sphere", color=color.red, scale=2 * atom.radius/SCALE) for atom in atoms]
+atom_entities = [
+    Entity(
+    model="sphere", 
+    color=color.red, 
+    scale=2 * atom.radius/SCALE, 
+    collider="sphere"
+    )
+    for atom in atoms
+]
 container_entity = Entity(
     model="cube",
     scale=2 * CONTAINER_SIZE / SCALE,
@@ -117,10 +125,22 @@ def update():
     temperature_text.text = f"Temperature: {temperature:.1f}K"
             
 def input(key):
-    global paused
+    global paused, forces
 
     if key == "space":
         paused = not paused
+    elif key == "r":
+        hovered = mouse.hovered_entity
+
+        if hovered in atom_entities:
+            index = atom_entities.index(hovered)
+
+            destroy(atom_entities.pop(index))
+            atoms.pop(index)
+
+            forces = calculate_forces(
+                np.array([atom.position for atom in atoms])
+            )
 
 if __name__ == "__main__":
     app.run()
