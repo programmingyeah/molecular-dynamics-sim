@@ -30,12 +30,13 @@ def calculate_forces(positions):
 
     return forces
 
-positions = np.array([atom.position for atom in atoms])
-velocities = np.array([atom.velocity for atom in atoms])
-forces = calculate_forces(positions)
+forces = calculate_forces(np.array([atom.position for atom in atoms]))
 
 def update():
-    global positions, velocities, forces
+    global forces
+
+    positions = np.array([atom.position for atom in atoms])
+    velocities = np.array([atom.velocity for atom in atoms])
 
     #verlet integration
     old_accelerations = forces / masses[:, np.newaxis]
