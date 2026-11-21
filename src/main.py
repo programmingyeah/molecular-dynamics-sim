@@ -10,6 +10,7 @@ rng = np.random.default_rng()
 SCALE = 1e-10  #one angstrom
 CONTAINER_SIZE = 10*SCALE
 SIGMA = 3e-10
+k_B = 1.380649e-23
 EPSILON = 1e-21
 N_ATOMS = 20
 DT = 5*1e-15
@@ -17,7 +18,6 @@ K = 1
 
 #generate N_ATOMS number of atoms at random positions within CONTAINER_SIZE
 atoms = [Atom(rng.uniform(-CONTAINER_SIZE, CONTAINER_SIZE, size=3)) for _ in range(N_ATOMS)]
-masses = np.array([atom.mass for atom in atoms])
 
 #ursina setup
 Entity.default_shader = lit_with_shadows_shader
@@ -33,9 +33,16 @@ container_entity = Entity(
     wireframe=True,
     double_sided=True,
 )
+temperature_text = Text(
+    text="Temperature: 0K",
+    position=window.top_left + Vec2(0.02, -0.02),
+    origin=(-0.5, 0.5),
+    scale=1.2,
+)
 
 EditorCamera()
 
+#functions
 def calculate_forces(positions):
     forces = np.zeros((len(atoms), 3))
     for i in range(len(atoms)):
@@ -55,6 +62,7 @@ forces = calculate_forces(np.array([atom.position for atom in atoms]))
 def update():
     global forces
 
+    masses = np.array([atom.mass for atom in atoms])
     positions = np.array([atom.position for atom in atoms])
     velocities = np.array([atom.velocity for atom in atoms])
 
@@ -80,6 +88,18 @@ def update():
 
         atom.velocity[outside] *= -1
         atom.position = np.clip(atom.position, -limit, limit)
+
+    #calculate the temperature
+    kinetic_energy = sum(
+        0.5 * atom.mass * np.linalg.norm(atom.velocity)**2 
+        for atom in atoms
+    )
+
+    #in the future we'll be adding atoms in runtime so dont use N_ATOMS 
+    temperature = (2 * kinetic_energy / (3 * len(atoms) * k_B))
+
+    print(temperature)
+    temperature_text.text = f"Temperature: {temperature:.1f}K"
             
 
 if __name__ == "__main__":
