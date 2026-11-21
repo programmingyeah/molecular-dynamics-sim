@@ -8,15 +8,15 @@ app = Ursina()
 rng = np.random.default_rng()
 
 SCALE = 1e-10  #one angstrom
+CONTAINER_SIZE = 10*SCALE
 SIGMA = 3e-10
 EPSILON = 1e-21
-N_ATOMS = 0
+N_ATOMS = 20
 DT = 5*1e-15
 K = 1
 
-#generate N_ATOMS number of atoms at random positions in a 10x10x10 box
-#atoms = [Atom(rng.uniform(-5.0, 5.0, size=3) * SCALE) for _ in range(N_ATOMS)]
-atoms = [Atom((0,-2**(1/6)/2.1 * SIGMA,0)), Atom((0,2**(1/6)/2.1 * SIGMA,0))]
+#generate N_ATOMS number of atoms at random positions within CONTAINER_SIZE
+atoms = [Atom(rng.uniform(-CONTAINER_SIZE, CONTAINER_SIZE, size=3)) for _ in range(N_ATOMS)]
 masses = np.array([atom.mass for atom in atoms])
 
 #ursina setup
@@ -65,6 +65,15 @@ def update():
         atom.position = position.copy()
         atom.velocity = velocity.copy()
         entity.position = tuple(position / SCALE)
+
+    #wall collisions
+    for atom in atoms:
+        limit = CONTAINER_SIZE - atom.radius
+        outside = np.abs(atom.position) > limit
+
+        atom.velocity[outside] *= -1
+        atom.position = np.clip(atom.position, -limit, limit)
+            
 
 if __name__ == "__main__":
     app.run()
