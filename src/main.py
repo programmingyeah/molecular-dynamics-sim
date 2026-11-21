@@ -11,7 +11,7 @@ SCALE = 1e-10  #one angstrom
 CONTAINER_SIZE = 10*SCALE
 SIGMA = 3e-10
 LJ_CUTOFF = 2.5 * SIGMA
-k_B = 1.380649e-23
+K_b = 1.380649e-23
 EPSILON = 1e-21
 N_ATOMS = 100
 DT = 5*1e-15
@@ -107,7 +107,7 @@ def update():
     )
 
     #in the future we'll be adding atoms in runtime so dont use N_ATOMS 
-    temperature = (2 * kinetic_energy / (3 * len(atoms) * k_B))
+    temperature = (2 * kinetic_energy / (3 * len(atoms) * K_b))
 
     temperature_text.text = f"Temperature: {temperature:.1f}K"
             
