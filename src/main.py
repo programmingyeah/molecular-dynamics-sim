@@ -17,6 +17,8 @@ N_ATOMS = 100
 DT = 5*1e-15
 K = 1
 
+paused = False
+
 #generate N_ATOMS number of atoms at random positions within CONTAINER_SIZE
 limit = CONTAINER_SIZE-max(ELEMENT_RADIUS_M.values())
 atoms = []
@@ -73,6 +75,9 @@ forces = calculate_forces(np.array([atom.position for atom in atoms]))
 def update():
     global forces
 
+    if paused: 
+        return
+
     masses = np.array([atom.mass for atom in atoms])
     positions = np.array([atom.position for atom in atoms])
     velocities = np.array([atom.velocity for atom in atoms])
@@ -111,6 +116,11 @@ def update():
 
     temperature_text.text = f"Temperature: {temperature:.1f}K"
             
+def input(key):
+    global paused
+
+    if key == "space":
+        paused = not paused
 
 if __name__ == "__main__":
     app.run()
